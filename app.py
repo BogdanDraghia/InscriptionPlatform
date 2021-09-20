@@ -114,7 +114,6 @@ def getHeader(includeToken = True):
         return header
 
 # %% Modality
-
 def getIdModality():
     idModality = modalityUrl.rsplit('/',1)[1]
     return idModality
@@ -146,7 +145,10 @@ def GetExtraModalityConfigInscription(price=False):
   returnarray = []
   res = requests.get(backendUrl + "/modality/" + getIdModality() + "/config_inscription",headers=getHeader()).json()
   if price == True:
-    return res["priceDefault"]
+    if(res["priceDefault"] == None):
+        return 0 
+    else:
+        return res["priceDefault"]
   for element in list(res):
       if (res[element] == True and element not in ("allowInscriptions","priceDefault","selectClub")):
         returnarray.append(element)
@@ -154,6 +156,9 @@ def GetExtraModalityConfigInscription(price=False):
 # %% 
 def inscriptionDictCorrecting(modalityId,row):
     mockInscription  = MockAthlete()[0]["inscription"].copy()
+    #price
+    # we will get the price if 
+    #modalitySlug
     mockInscription["modalitySlug"] = getModalitySlug()
     #atributes
     attributes = cleanAttributes(modalityId)
@@ -196,6 +201,7 @@ def addAditionalInfo():
     return localDict
 # %% 
 def translateExcel(row):
+    #from Nombre to name
     current = rowExcelData(row)
     newDict = MockAthlete().copy()
     aditional = addAditionalInfo()
@@ -241,8 +247,8 @@ def startScript(startRow = 0):
                 varTotalStateFail.set(str(variableFail))
         varTotalStateMessage.set("El programa acabo de realizar las inscripciones")
         textWrite("Resultado: Fallos: "+ varTotalStateFail.get() + "; Exito: " + varTotalStateOk.get() + "; Total: " + varTotalState.get())
-    except:
-        print("error")
+    except Exception as e:
+        print(e)
 
 
 # %% 
@@ -305,7 +311,6 @@ tk.Button(root,command=ReturnExcelLenght,text="Ver cuantas inscripciones estan e
 tk.Label(root,textvariable=varLen).grid(column=1,row=4,sticky='w')
 
 
-# tk.Button(root,text="Test",bg="#02b5dd",anchor="w").grid(column=0,row=5,sticky='we',padx=5, pady=5)
 tk.Button(root,command=threading,text="Empezar",bg="#02b5dd").grid(column=0,row=7,sticky='w',padx=5, pady=5, columnspan=2)
 tk.Label(root,text="Fallos",width=50,anchor="w").grid(column=0,row=8,sticky='we',padx=5, pady=5)
 tk.Label(root,text="Exitos:",width=50,anchor="w").grid(column=0,row=9,sticky='we',padx=5, pady=5)
@@ -314,7 +319,5 @@ tk.Label(root,textvariable=varTotalStateFail,width=50,anchor="w").grid(column=1,
 tk.Label(root,textvariable=varTotalStateOk,width=50,anchor="w").grid(column=1,row=9,sticky='we',padx=5, pady=5)
 tk.Label(root,textvariable=varTotalState,width=50,anchor="w").grid(column=1,row=10,sticky='we',padx=5, pady=5)
 tk.Label(root,textvariable=varTotalStateMessage,width=50,anchor="w").grid(column=0,row=11,sticky='we',padx=5, pady=5)
-# entry2 = tk.Entry(root)
-# entry2.grid(column=0,row=6,sticky='w',padx=5, pady=5)
 root.mainloop()
 
